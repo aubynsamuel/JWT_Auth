@@ -100,4 +100,25 @@ router.post('/logout', async (req, res) => {
     return res.json({ message: 'Logged out' });
 });
 
+router.put("/updateRole/:email", async (req, res) => {
+    const email = req.params.email
+    const role = req.body.role;
+    const user = await User.findOne({ email });
+    const userId = user?._id;
+    if (userId) {
+        User.updateOne({ _id: userId }, { roles: [role] })
+            .then(updatedUser => {
+                if (!updatedUser) {
+                    return res.status(404).json({ error: 'User not found' });
+                }
+                res.json({ message: `User role updated to ${role}`, userRole: updatedUser.roles });
+            })
+            .catch(err => {
+                console.error(err);
+                res.status(500).json({ error: 'Internal server error', error: err.message });
+            });
+    }
+
+})
+
 module.exports = router;
